@@ -18,6 +18,7 @@ setup(
     license=open('LICENSE.md').read(),
     package_dir={'tcapy': 'tcapy'},
     packages=['tcapy'],
+    install_requires=['requests'],
     test_suite='tests',
     classifiers=(
         'Development Status :: 3 - Alpha',

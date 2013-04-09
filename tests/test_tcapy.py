@@ -232,7 +232,7 @@ class TestTeamCityApi(unittest.TestCase):
         self.assertRaises(TeamCityApiError, f)
 
     def test_expects_raises_on_non_match_content_type(self):
-        @expects(200, 'test/html')
+        @expects(200, 'text/html')
         def f():
             return SessionMock(200, 'application/json')
         self.assertRaises(TeamCityApiError, f)
