@@ -1,6 +1,8 @@
-[run]
+[paths]
 source =
-    */tcapy*
+    */tcapy
+
+[run]
 omit =
     .*
     */test*
