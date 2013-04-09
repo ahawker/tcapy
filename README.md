@@ -1,8 +1,8 @@
-#teamcity-apy (tcapy)
+# tcapy
 [![Build Status](https://travis-ci.org/ahawker/tcapy.png)](https://travis-ci.org/ahawker/tcapy)
 [![Coverage Status](https://coveralls.io/repos/ahawker/tcapy/badge.png?branch=master)](https://coveralls.io/r/ahawker/tcapy)
 
-teamcity-apy (tcapy) provides python bindings for JetBrains TeamCity REST API.
+tcapy provides python bindings for JetBrains TeamCity REST API.
 
 ### Status
 This module is currently under active development. Use at your own risk.
