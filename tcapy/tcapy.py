@@ -25,17 +25,16 @@ def expects(expected_status_code, expected_content_type):
     return decorator
 
 class TeamCityApi(object):
-    DEFAULTS = {
+    SESSION_DEFAULTS = {
         'headers': {
             'accept': 'application/json'
         },
         'auth': (os.environ.get('TCAPY_USERNAME'), os.environ.get('TCAPY_PASSWORD')),
-        'server': os.environ.get('TCAPY_SERVER'),
         'verify': False
     }
     def __init__(self, **kwargs):
-        self.server = kwargs.pop('server', self.DEFAULTS.pop('server'))
-        self.config = dict(self.DEFAULTS, **kwargs)
+        self.server = kwargs.pop('server', os.environ.get('TCAPY_SERVER'))
+        self.config = dict(self.SESSION_DEFAULTS, **kwargs)
         self.session = requests.Session()
 
     @expects(200, 'text/plain')

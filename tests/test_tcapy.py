@@ -1,10 +1,22 @@
 __author__ = 'Andrew Hawker <andrew.r.hawker@gmail.com>'
 
 from tcapy.tcapy import (encode_parameter_pairs, encode_custom_parameters, encode_action_parameters, build_action_url,
-                         build_rest_url, build_url_filter)
+                         build_rest_url, build_url_filter, expects, TeamCityApi, TeamCityApiError)
 import unittest
-import urllib
 import urlparse
+
+class SessionMock(object):
+    def __init__(self, status_code, content_type):
+        self.status_code = status_code
+        self.headers = {'content-type': content_type}
+
+    def get(self, *args, **kwargs):
+        self.called = True
+        self.args = args
+        self.kwargs = kwargs
+
+class TeamCityServerMock(object):
+    pass
 
 class TestEncodeParameterPairs(unittest.TestCase):
     @classmethod
@@ -195,7 +207,44 @@ class TestUrlHelpers(unittest.TestCase):
         assert build_url_filter(**{'id': self.build_id, 'name': self.build_name}) == 'id:{0}'.format(self.build_id)
 
 class TestTeamCityApi(unittest.TestCase):
-    pass
+    @classmethod
+    def setUpClass(cls):
+        cls.config = {
+            'headers': {
+                'accept': 'application/json'
+            },
+            'auth': ('test_username', 'test_password'),
+            'server': 'test_server',
+            'verify': False
+        }
+        cls.api = TeamCityApi(**cls.config)
+
+    def test_api_config(self):
+        assert self.api.server == 'test_server'
+        assert self.api.config['auth'] == ('test_username', 'test_password')
+        assert self.api.config['headers'] == {'accept': 'application/json'}
+        assert not self.api.config['verify']
+
+    def test_excepts_raises_on_non_match_status_code(self):
+        @expects(200, 'application/json')
+        def f():
+            return SessionMock(404, 'application/json')
+        self.assertRaises(TeamCityApiError, f)
+
+    def test_expects_raises_on_non_match_content_type(self):
+        @expects(200, 'test/html')
+        def f():
+            return SessionMock(200, 'application/json')
+        self.assertRaises(TeamCityApiError, f)
+
+    def test_excepts_passes_on_match(self):
+        @expects(200, 'application/json')
+        def f():
+            return SessionMock(200, 'application/json')
+        response = f()
+        assert response.status_code == 200
+        assert response.headers['content-type'] == 'application/json'
+
 
 if __name__ == '__main__':
     unittest.main()
