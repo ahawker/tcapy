@@ -1,6 +1,7 @@
 __author__ = 'Andrew Hawker <andrew.r.hawker@gmail.com>'
 
-from tcapy.tcapy import encode_parameter_pairs, encode_custom_parameters, encode_action_parameters
+from tcapy.tcapy import (encode_parameter_pairs, encode_custom_parameters, encode_action_parameters, build_action_url,
+                         build_rest_url, build_url_filter)
 import unittest
 import urllib
 import urlparse
@@ -140,6 +141,58 @@ class TestEncodeActionParameters(unittest.TestCase):
         assert ('name', prefix + self.env_key) == key
         assert ('value', self.env_value) == value
         assert ('add2Queue', self.build_id) == build_id
+
+
+class TestUrlHelpers(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.server = 'http://test-teamcity.domain.com'
+        cls.build_id = '1234'
+        cls.build_name = 'my-build'
+        cls.modification_id = '42'
+        cls.top = True
+        cls.params = {'modification_id': cls.modification_id,
+                      'top': cls.top}
+        cls.resources = 'version projects builds buildTypes agents'.split()
+
+    @classmethod
+    def rest_url_path_match(cls, resource):
+        url = urlparse.urlparse(build_rest_url(cls.server, resource))
+        return url.path == '/app/rest/{0}'.format(resource)
+
+    def test_action_url_no_params(self):
+        url = urlparse.urlparse(build_action_url(self.server, self.build_id))
+        assert url.query == 'add2Queue={0}'.format(self.build_id)
+        assert url.path == '/action.html'
+
+    def test_action_url_many_params(self):
+        url = urlparse.urlparse(build_action_url(self.server, self.build_id, **self.params))
+        top, mod_id, build_id = urlparse.parse_qsl(url.query)
+        assert url.path == '/action.html'
+        assert ('moveToTop', str(True)) == top
+        assert ('modificationId', self.modification_id) == mod_id
+        assert ('add2Queue', self.build_id) == build_id
+
+    def test_rest_url_no_resources(self):
+        url = urlparse.urlparse(build_rest_url(self.server))
+        assert url.path == '/app/rest'
+
+    def test_rest_url_supported_resources(self):
+        for resource in self.resources:
+            assert self.rest_url_path_match(resource)
+
+    def test_build_url_filter_none_or_invalid_key(self):
+        assert build_url_filter(**{}) == ''
+        assert build_url_filter(**{'age': 0}) == ''
+
+    def test_build_url_filter_by_id(self):
+        assert build_url_filter(**{'id': self.build_id}) == 'id:{0}'.format(self.build_id)
+
+    def test_build_url_filter_by_name(self):
+        assert build_url_filter(**{'name': self.build_name}) == 'name:{0}'.format(self.build_name)
+
+    def test_build_url_filter_multi(self):
+        assert build_url_filter(**{'id': self.build_id, 'name': self.build_name}) == 'id:{0}'.format(self.build_id)
 
 class TestTeamCityApi(unittest.TestCase):
     pass

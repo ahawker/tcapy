@@ -84,7 +84,7 @@ def encode_custom_parameters(**kwargs):
     return '&'.join(filter(None, (config, system, env)))
 
 def encode_action_parameters(id, **kwargs):
-    params = dict((k,v) for k,v in {'add2Queue': id,
+    params = dict((k,v) for k,v in {'add2Queue': str(id),
                                     'modificationId': kwargs.get('modification_id', None),
                                     'moveToTop': kwargs.get('top', None),
                                     'agentId': kwargs.get('agents', None),}.items() if v)
