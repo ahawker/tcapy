@@ -5,7 +5,7 @@ source =
 [run]
 omit =
     .*
-    /*
+    *usr*
     */test*
     *__init__*
 
