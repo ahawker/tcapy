@@ -5,6 +5,7 @@ source =
 [run]
 omit =
     .*
+    /*
     */test*
     *__init__*
 
